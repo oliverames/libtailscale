@@ -775,6 +775,9 @@ func TsnetEnableFunnelToLocalhostPlaintextHttp1(sd C.int, localhostPort C.int) C
 	if err != nil {
 		return s.recErr(err)
 	}
+	if len(st.CertDomains) == 0 {
+		return s.recErr(fmt.Errorf("libtailscale: no certificate domain; enable MagicDNS and HTTPS certificates for the tailnet"))
+	}
 	domain := st.CertDomains[0]
 
 	hp := ipn.HostPort(net.JoinHostPort(domain, strconv.Itoa(443)))
@@ -791,9 +794,8 @@ func TsnetEnableFunnelToLocalhostPlaintextHttp1(sd C.int, localhostPort C.int) C
 		},
 	}
 
-	lc.SetServeConfig(ctx, sc)
-	if !sc.AllowFunnel[hp] {
-		return s.recErr(fmt.Errorf("libtailscale: failed to enable funnel"))
+	if err := lc.SetServeConfig(ctx, sc); err != nil {
+		return s.recErr(fmt.Errorf("libtailscale: failed to enable funnel: %w", err))
 	}
 
 	return 0

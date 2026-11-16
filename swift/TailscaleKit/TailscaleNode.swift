@@ -234,6 +234,42 @@ public actor TailscaleNode {
         }.value
     }
 
+    /// Publishes this node on the public internet through Tailscale Funnel.
+    ///
+    /// Terminates TLS on port 443 for the node's `*.ts.net` name and forwards
+    /// each connection to `http://127.0.0.1:<localPort>`.  The node must be up,
+    /// the tailnet must have MagicDNS and HTTPS certificates enabled, and the
+    /// tailnet policy must grant this node the `funnel` node attribute;
+    /// otherwise this throws with the error from the control plane or local
+    /// backend.  Anyone on the internet can reach the forwarded port, so the
+    /// server behind it must authenticate every request.
+    ///
+    /// @See tailscale_enable_funnel_to_localhost_plaintext_http1 in Tailscale.h
+    ///
+    /// - Returns: The public host name, for example `node.tailnet.ts.net`.
+    /// - Throws: A TailscaleError on failure.
+    public func enableFunnel(localPort: UInt16) async throws -> String {
+        guard let tailscale else {
+            throw TailscaleError.badInterfaceHandle
+        }
+
+        struct CertDomains: Decodable { let CertDomains: [String]? }
+        let status = try JSONDecoder().decode(CertDomains.self, from: try await statusJSON())
+        guard let domain = status.CertDomains?.first else {
+            throw TailscaleError.internalError(
+                "no certificate domain; enable MagicDNS and HTTPS certificates")
+        }
+
+        let port = Int32(localPort)
+        try await Task.detached {
+            let res = tailscale_enable_funnel_to_localhost_plaintext_http1(tailscale, port)
+            guard res == 0 else {
+                throw TailscaleError.fromPosixErrCode(res, tailscale.getErrorMessage())
+            }
+        }.value
+        return domain
+    }
+
     /// Tears down the Tailscale server.
     ///
     /// @See tailscale_down in Tailscale.h

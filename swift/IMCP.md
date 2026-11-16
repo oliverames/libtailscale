@@ -89,11 +89,14 @@ except the features in this table.
 | `nattraversal` | STUN and hole punching make direct connections through NAT. |
 | `portmapper` | NAT-PMP, PCP, and UPnP port mapping make more direct connections. |
 | `tailnetlock` | Without it, the node does not check node key signatures, so it accepts peers that Tailnet Lock rejects. |
+| `acme` | Funnel terminates TLS in the node, which needs a certificate for its ts.net name. |
 | `health` | Magicsock changes its home DERP region only while health reports a connection to control. Without it, the home region does not change after the first choice, and status reports the node as offline. |
 
 The build omits `logtail` and `netlog`,
 so the library cannot upload logs or network flow logs.
-It omits `acme`, so the node cannot get TLS certificates.
+It keeps `acme` so that `TailscaleNode.enableFunnel(localPort:)` can obtain
+a certificate for the node's ts.net name. The sizes below were measured
+before this change.
 
 For 0.2.0-imcp.2, which is universal,
 the signed framework is 35,659,593 bytes with this profile,
@@ -116,7 +119,7 @@ at the pinned `tailscale.com` version:
 
 ```sh
 go run tailscale.com/cmd/featuretags --min \
-  --add=netstack,ipnbus,serve,udptransport,nattraversal,portmapper,tailnetlock,health \
+  --add=netstack,ipnbus,serve,udptransport,nattraversal,portmapper,tailnetlock,health,acme \
   | tr , '\n'
 ```
 

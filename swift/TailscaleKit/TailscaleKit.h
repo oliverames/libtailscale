@@ -223,6 +223,19 @@ extern int tailscale_logout(tailscale sd);
 // 	-1    - call tailscale_errmsg for details (*json_out is NULL)
 extern int tailscale_status_json(tailscale sd, char** json_out);
 
+// tailscale_enable_funnel_to_localhost_plaintext_http1 configures sd to have
+// Tailscale Funnel enabled: HTTPS on port 443 for the node's ts.net name is
+// terminated with an automatically obtained certificate, and each connection
+// is forwarded to 127.0.0.1:localhostPort without TLS. Anyone on the internet
+// can reach that port, so the server there must authenticate every request.
+//
+// Returns:
+// 	0     - success
+// 	EBADF - sd is not a valid tailscale
+// 	-1    - call tailscale_errmsg for details; the message carries the error
+// 	        from the local backend, such as a policy that denies funnel
+extern int tailscale_enable_funnel_to_localhost_plaintext_http1(tailscale sd, int localhostPort);
+
 // tailscale_errmsg writes the details of the last error to buf.
 //
 // After returning, buf is always NUL-terminated.

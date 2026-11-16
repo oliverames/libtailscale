@@ -4,11 +4,10 @@
 # Generated at the pinned tailscale.com (v1.104.1) with:
 #
 #   go run tailscale.com/cmd/featuretags --min \
-#     --add=netstack,ipnbus,serve,udptransport,nattraversal,portmapper,tailnetlock,health
+#     --add=netstack,ipnbus,serve,udptransport,nattraversal,portmapper,tailnetlock,health,acme
 #
 # Regenerate this list when the tailscale.com version changes.
 ts_omit_ace
-ts_omit_acme
 ts_omit_advertiseexitnode
 ts_omit_advertiseroutes
 ts_omit_androidbin
