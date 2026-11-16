@@ -236,6 +236,17 @@ extern int tailscale_status_json(tailscale sd, char** json_out);
 // 	        from the local backend, such as a policy that denies funnel
 extern int tailscale_enable_funnel_to_localhost_plaintext_http1(tailscale sd, int localhostPort);
 
+// tailscale_disable_funnel clears the node's serve config, which stops
+// Funnel and the forwarding that tailscale_enable_funnel_to_localhost_plaintext_http1
+// set up. The serve config is saved in the node's state directory, so call
+// this before stopping a node whose Funnel should not come back on its next start.
+//
+// Returns:
+// 	0     - success
+// 	EBADF - sd is not a valid tailscale
+// 	-1    - call tailscale_errmsg for details
+extern int tailscale_disable_funnel(tailscale sd);
+
 // tailscale_errmsg writes the details of the last error to buf.
 //
 // After returning, buf is always NUL-terminated.

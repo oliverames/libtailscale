@@ -270,6 +270,27 @@ public actor TailscaleNode {
         return domain
     }
 
+    /// Stops Funnel by clearing the node's serve config.
+    ///
+    /// The config is saved in the node's state directory, so call this before
+    /// closing a node whose Funnel shouldn't come back the next time it starts.
+    ///
+    /// @See tailscale_disable_funnel in Tailscale.h
+    ///
+    /// - Throws: A TailscaleError on failure.
+    public func disableFunnel() async throws {
+        guard let tailscale else {
+            throw TailscaleError.badInterfaceHandle
+        }
+
+        try await Task.detached {
+            let res = tailscale_disable_funnel(tailscale)
+            guard res == 0 else {
+                throw TailscaleError.fromPosixErrCode(res, tailscale.getErrorMessage())
+            }
+        }.value
+    }
+
     /// Tears down the Tailscale server.
     ///
     /// @See tailscale_down in Tailscale.h

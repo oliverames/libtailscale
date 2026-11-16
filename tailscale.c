@@ -28,6 +28,7 @@ extern int TsnetWhoIs(int sd, char* addr, char** jsonOut);
 extern int TsnetLogout(int sd);
 extern int TsnetStatusJSON(int sd, char** jsonOut);
 extern int TsnetEnableFunnelToLocalhostPlaintextHttp1(int sd, int localhostPort);
+extern int TsnetDisableFunnel(int sd);
 
 tailscale tailscale_new() {
 	return TsnetNewServer();
@@ -102,6 +103,10 @@ int tailscale_status_json(tailscale sd, char** json_out) {
 
 int tailscale_errmsg(tailscale sd, char* buf, size_t buflen) {
 	return TsnetErrmsg(sd, buf, buflen);
+}
+
+int tailscale_disable_funnel(tailscale sd) {
+	return TsnetDisableFunnel(sd);
 }
 
 int tailscale_enable_funnel_to_localhost_plaintext_http1(tailscale sd, int localhostPort) {

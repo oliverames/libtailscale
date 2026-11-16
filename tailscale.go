@@ -800,3 +800,23 @@ func TsnetEnableFunnelToLocalhostPlaintextHttp1(sd C.int, localhostPort C.int) C
 
 	return 0
 }
+
+//export TsnetDisableFunnel
+func TsnetDisableFunnel(sd C.int) C.int {
+	s := getServer(sd)
+	if s == nil {
+		return C.EBADF
+	}
+	lc, err := s.s.LocalClient()
+	if err != nil {
+		return s.recErr(err)
+	}
+	// The serve config is saved in the node's state, so it outlives this
+	// process unless it's cleared.
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := lc.SetServeConfig(ctx, &ipn.ServeConfig{}); err != nil {
+		return s.recErr(fmt.Errorf("libtailscale: failed to clear the serve config: %w", err))
+	}
+	return 0
+}
